@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulador de Colisiones - 5 Casos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #22223b 70%, #9a8c98 100%);
+      min-height: 100vh;
+      font-family: 'Montserrat', sans-serif;
+      color: #222;
+    }
+    .title {
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 2px 2px 8px #0008;
+      text-align: center;
+      margin-top: 2rem;
+      letter-spacing: 0.5px;
+    }
+    .sim-card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px 0 #2223;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      transition: transform 0.18s;
+      border: 1.5px solid #e3e3e3;
+    }
+    .sim-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 12px 40px 0 #9a8c9890;
+    }
+    .sim-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #4f3d7a;
+      margin-bottom: 0.4rem;
+    }
+    .case-label {
+      font-size: 0.98rem;
+      color: #5b5873;
+      margin-bottom: 0.6rem;
+      font-weight: 500;
+    }
+    .sim-anim {
+      width: 100%;
+      height: 70px;
+      background: #ebe5f7;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #ddd;
+    }
+    .square {
+      width: 38px;
+      height: 38px;
+      border-radius: 0.6rem;
+      background: linear-gradient(120deg, #6c63ff 80%, #a3c4f3 100%);
+      position: absolute;
+      transition: left 0.45s cubic-bezier(0.5,1.7,0.2,0.8);
+      border: 2.5px solid #5a53ba;
+      box-shadow: 0 2px 12px #6c63ff60;
+      z-index: 2;
+    }
+    .square2 {
+      background: linear-gradient(120deg, #ffb36b 80%, #ffe3b0 100%);
+      border-color: #e08e2e;
+      z-index: 1;
+    }
+    .wall {
+      height: 38px;
+      width:13px;
+      background:#4f3d7a;
+      position:absolute;
+      right:12px;
+      border-radius:8px;
+      top: 16px;
+      z-index: 4;
+    }
+    .formula-box {
+      background: #f5f2fa;
+      border-radius: 0.7rem;
+      padding: 0.65rem 1.1rem;
+      margin-bottom: 0.6rem;
+      font-size: 1rem;
+      color: #473887;
+      border-left: 4px solid #6c63ff;
+      margin-top: 0.4rem;
+      overflow-x: auto;
+    }
+    .result-box {
+      background: #faf7fe;
+      border-radius: 0.7rem;
+      padding: 0.9rem 1.2rem;
+      margin-top: 0.8rem;
+      font-size: 1.08rem;
+      min-height: 2rem;
+      color: #393c51;
+      border: 1px solid #ede4fd;
+    }
+    .data-box {
+      background: #ede4fd;
+      border-radius: 0.6rem;
+      padding: 0.5rem 1.1rem;
+      font-size: 1.04rem;
+      color: #423468;
+      margin-bottom: 0.8rem;
+      border-left: 4px solid #ffb36b;
+    }
+    .btn-simular {
+      background: #6c63ff;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.45rem 1.4rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 2px 10px #9a8c9830;
+      transition: background 0.2s;
+    }
+    .btn-simular:hover {
+      background: #4f3d7a;
+      color: #ffe3b0;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR CONSISTENTE -->
+  <nav class="navbar navbar-expand-lg" style="background: #f7f3ea; border-bottom: 2px solid #e3e3e3;">
+    <div class="container">
+      <a class="navbar-brand mx-auto fw-bold" href="../index.html" style="font-size:2rem; color:#111; letter-spacing:1px;">
+        Tercera Ley de Newton
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../introduccion.html">Introducción</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Simulación</a></li>
+          <li class="nav-item"><a class="nav-link" href="../ejercicios.html">Ejercicios</a></li>
+          <li class="nav-item"><a class="nav-link" href="../recuersos/video1/video.html">Video</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <h1 class="title">Simulador de Colisiones<br>5 Casos Reales con Bloques</h1>
+  <div class="container mt-4 mb-5">
+    <div class="row g-4">
+
+      <!-- CASO 1: Elástica frontal -->
+      <div class="col-md-6">
+        <div class="sim-card">
+          <div class="sim-title">Caso 1: Colisión Elástica Frontal</div>
+          <div class="case-label">Ambos bloques se mueven uno hacia el otro y rebotan (se conserva energía cinética y cantidad de movimiento).</div>
+          <div class="data-box" id="datos1">
+            <b>Bloque A:</b> masa = 2 kg, velocidad inicial = 3 m/s <br>
+            <b>Bloque B:</b> masa = 1.5 kg, velocidad inicial = -2 m/s
+          </div>
+          <div class="formula-box">
+            \( v_{Af} = \frac{m_A - m_B}{m_A + m_B} v_{Ai} + \frac{2m_B}{m_A + m_B} v_{Bi} \) <br>
+            \( v_{Bf} = \frac{2m_A}{m_A + m_B} v_{Ai} + \frac{m_B - m_A}{m_A + m_B} v_{Bi} \)
+          </div>
+          <div class="sim-anim" id="anim1">
+            <div class="square" id="a1"></div>
+            <div class="square square2" id="b1"></div>
+          </div>
+          <button class="btn-simular" onclick="simular(1)">Simular</button>
+          <div class="result-box" id="res1"></div>
+        </div>
+      </div>
+
+      <!-- CASO 2: Perfectamente Inelástica -->
+      <div class="col-md-6">
+        <div class="sim-card">
+          <div class="sim-title">Caso 2: Colisión Perfectamente Inelástica</div>
+          <div class="case-label">Los bloques se unen después del choque (sólo se conserva el momento lineal).</div>
+          <div class="data-box" id="datos2">
+            <b>Bloque A:</b> masa = 2.5 kg, velocidad inicial = 4 m/s <br>
+            <b>Bloque B:</b> masa = 2 kg, velocidad inicial = 0 m/s
+          </div>
+          <div class="formula-box">
+            \( v_f = \frac{m_A v_{Ai} + m_B v_{Bi}}{m_A + m_B} \)
+          </div>
+          <div class="sim-anim" id="anim2">
+            <div class="square" id="a2"></div>
+            <div class="square square2" id="b2"></div>
+          </div>
+          <button class="btn-simular" onclick="simular(2)">Simular</button>
+          <div class="result-box" id="res2"></div>
+        </div>
+      </div>
+
+      <!-- CASO 3: Parcialmente Inelástica (e=0.5) -->
+      <div class="col-md-6">
+        <div class="sim-card">
+          <div class="sim-title">Caso 3: Colisión Parcialmente Inelástica (e = 0.5)</div>
+          <div class="case-label">Rebote con pérdida parcial de energía (coeficiente de restitución 0.5).</div>
+          <div class="data-box" id="datos3">
+            <b>Bloque A:</b> masa = 1.2 kg, velocidad inicial = 5 m/s <br>
+            <b>Bloque B:</b> masa = 1.8 kg, velocidad inicial = -2 m/s
+          </div>
+          <div class="formula-box">
+            \( v_{Af} = \frac{m_A - e m_B}{m_A + m_B} v_{Ai} + \frac{(1+e)m_B}{m_A + m_B} v_{Bi} \) <br>
+            \( v_{Bf} = \frac{(1+e)m_A}{m_A + m_B} v_{Ai} + \frac{m_B - e m_A}{m_A + m_B} v_{Bi} \)
+          </div>
+          <div class="sim-anim" id="anim3">
+            <div class="square" id="a3"></div>
+            <div class="square square2" id="b3"></div>
+          </div>
+          <button class="btn-simular" onclick="simular(3)">Simular</button>
+          <div class="result-box" id="res3"></div>
+        </div>
+      </div>
+
+      <!-- CASO 4: Elástica con bloque en reposo -->
+      <div class="col-md-6">
+        <div class="sim-card">
+          <div class="sim-title">Caso 4: Colisión Elástica con Bloque en Reposo</div>
+          <div class="case-label">El bloque B parte en reposo. Se observa cómo se transfiere la velocidad.</div>
+          <div class="data-box" id="datos4">
+            <b>Bloque A:</b> masa = 3 kg, velocidad inicial = 6 m/s <br>
+            <b>Bloque B:</b> masa = 2 kg, velocidad inicial = 0 m/s
+          </div>
+          <div class="formula-box">
+            \( v_{Af} = \frac{m_A - m_B}{m_A + m_B} v_{Ai} \) <br>
+            \( v_{Bf} = \frac{2m_A}{m_A + m_B} v_{Ai} \)
+          </div>
+          <div class="sim-anim" id="anim4">
+            <div class="square" id="a4"></div>
+            <div class="square square2" id="b4"></div>
+          </div>
+          <button class="btn-simular" onclick="simular(4)">Simular</button>
+          <div class="result-box" id="res4"></div>
+        </div>
+      </div>
+
+      <!-- CASO 5: Rebote contra pared -->
+      <div class="col-md-6 mx-auto">
+        <div class="sim-card">
+          <div class="sim-title">Caso 5: Rebote contra Pared (colisión elástica)</div>
+          <div class="case-label">Un solo bloque choca y rebota con una pared (se invierte su velocidad).</div>
+          <div class="data-box" id="datos5">
+            <b>Bloque:</b> masa = 2 kg, velocidad inicial = 5 m/s
+          </div>
+          <div class="formula-box">
+            \( v_f = -v_i \)
+          </div>
+          <div class="sim-anim" id="anim5">
+            <div class="square" id="a5"></div>
+            <div class="wall"></div>
+          </div>
+          <button class="btn-simular" onclick="simular(5)">Simular</button>
+          <div class="result-box" id="res5"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Posiciones iniciales
+    const POS = {
+      1: {a: "17%", b: "70%"}, 2: {a: "18%", b: "70%"}, 3: {a: "18%", b: "70%"},
+      4: {a: "18%", b: "70%"}, 5: {a: "18%", wall: "70%"}
+    };
+
+    // Datos predefinidos para cada simulación
+    const casos = [
+      {},
+      // 1: Elástica frontal
+      { mA: 2, vAi: 3, mB: 1.5, vBi: -2 },
+      // 2: Perfectamente inelástica
+      { mA: 2.5, vAi: 4, mB: 2, vBi: 0 },
+      // 3: Parcialmente inelástica e=0.5
+      { mA: 1.2, vAi: 5, mB: 1.8, vBi: -2, e: 0.5 },
+      // 4: Elástica, bloque en reposo
+      { mA: 3, vAi: 6, mB: 2, vBi: 0 },
+      // 5: Bloque vs pared
+      { mA: 2, vAi: 5 }
+    ];
+
+    // Reiniciar posiciones de los bloques (antes y después de simular)
+    function resetBloques(num){
+      let a = document.getElementById(`a${num}`);
+      let b = document.getElementById(`b${num}`);
+      if(a) a.style.left = POS[num].a;
+      if(b) b.style.left = POS[num].b;
+    }
+    // Iniciar así al cargar
+    for(let i=1;i<=5;i++) resetBloques(i);
+
+    function simular(num){
+      resetBloques(num);
+      document.getElementById(`res${num}`).innerHTML = '';
+      let a = document.getElementById(`a${num}`);
+      let b = document.getElementById(`b${num}`);
+
+      // Pega animación inicial rápida
+      setTimeout(()=>{ 
+        if(a) a.style.left = "38%";
+        if(b) b.style.left = "50%"; 
+      },350);
+
+      // Luego calcula resultado y muestra la colisión "final"
+      setTimeout(()=>{
+        let html = "";
+        if(num===1){
+          // Elástica frontal
+          let {mA, vAi, mB, vBi} = casos[1];
+          let vAf = ((mA-mB)/(mA+mB))*vAi + ((2*mB)/(mA+mB))*vBi;
+          let vBf = ((2*mA)/(mA+mB))*vAi + ((mB-mA)/(mA+mB))*vBi;
+          // Mueve según dirección final
+          if(a) a.style.left = vAf>0 ? "70%" : "12%";
+          if(b) b.style.left = vBf>0 ? "70%" : "12%";
+          html = `Velocidad final bloque A: <b>${vAf.toFixed(2)} m/s</b><br>
+                  Velocidad final bloque B: <b>${vBf.toFixed(2)} m/s</b>`;
+        }
+        if(num===2){
+          // Perfectamente inelástica
+          let {mA, vAi, mB, vBi} = casos[2];
+          let vf = (mA*vAi + mB*vBi)/(mA+mB);
+          if(a) a.style.left = vf>0 ? "70%" : "12%";
+          if(b) b.style.left = vf>0 ? "74%" : "12%";
+          html = `Ambos bloques quedan unidos.<br>
+                  Velocidad final: <b>${vf.toFixed(2)} m/s</b>`;
+        }
+        if(num===3){
+          // Parcialmente inelástica
+          let {mA, vAi, mB, vBi, e} = casos[3];
+          let vAf = ((mA-e*mB)/(mA+mB))*vAi + ((1+e)*mB/(mA+mB))*vBi;
+          let vBf = ((1+e)*mA/(mA+mB))*vAi + ((mB-e*mA)/(mA+mB))*vBi;
+          if(a) a.style.left = vAf>0 ? "70%" : "12%";
+          if(b) b.style.left = vBf>0 ? "70%" : "12%";
+          html = `Velocidad final bloque A: <b>${vAf.toFixed(2)} m/s</b><br>
+                  Velocidad final bloque B: <b>${vBf.toFixed(2)} m/s</b>`;
+        }
+        if(num===4){
+          // Elástica con B en reposo
+          let {mA, vAi, mB} = casos[4];
+          let vAf = ((mA-mB)/(mA+mB))*vAi;
+          let vBf = (2*mA/(mA+mB))*vAi;
+          if(a) a.style.left = vAf>0 ? "70%" : "12%";
+          if(b) b.style.left = vBf>0 ? "70%" : "12%";
+          html = `Velocidad final bloque A: <b>${vAf.toFixed(2)} m/s</b><br>
+                  Velocidad final bloque B: <b>${vBf.toFixed(2)} m/s</b>`;
+        }
+        if(num===5){
+          // Rebote pared
+          let {vAi} = casos[5];
+          if(a) a.style.left = "68%";
+          html = `Velocidad después del rebote: <b>${(-vAi).toFixed(2)} m/s</b>`;
+        }
+        document.getElementById(`res${num}`).innerHTML = html;
+        MathJax.typesetPromise();
+      },1300);
+
+      // Al acabar, reinicia bloques a la posición inicial para poder volver a simular
+      setTimeout(()=>{ resetBloques(num); },3500);
+    }
+  </script>
+</body>
+</html>
