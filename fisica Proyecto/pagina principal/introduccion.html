@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Introducción - Tercera Ley de Newton</title>
+  <!-- Google Font Montserrat -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- MathJax para renderizar fórmulas -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    async
+  ></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #F8F0E3; /* Blanco hueso */
+      font-family: 'Montserrat', sans-serif;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    /* Fondo animado de operadores */
+    .operators-bg {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      pointer-events:none; z-index:0;
+    }
+    .operator {
+      position: absolute;
+      font-size: 3rem;
+      color: rgba(10,15,45,0.3);
+      animation: moveOp linear infinite;
+    }
+    @keyframes moveOp {
+      0%   { transform: translateY(100vh); opacity: 0; }
+      10%  { opacity: 0.3; }
+      100% { transform: translateY(-10vh); opacity: 0; }
+    }
+    /* Asegurar que el contenido esté sobre el fondo */
+    body > * { position: relative; z-index: 1; }
+    /* Navbar */
+    .navbar {
+      background-color: #F8F0E3;
+      border-bottom: 1px solid rgba(10,15,45,0.2);
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: #0a0f2d !important;
+    }
+    .nav-link {
+      color: rgba(10,15,45,0.8) !important;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .nav-link:hover,
+    .nav-link.active { color: #0a0f2d !important; }
+    /* Dropdown */
+    .dropdown { position: relative; }
+    .dropdown-menu {
+      position: absolute; top:100%; left:0;
+      display: none; opacity:0; visibility:hidden;
+      transform: translateY(10px);
+      transition: opacity .2s ease, transform .2s ease;
+      margin-top:.5rem;
+    }
+    .navbar .dropdown:hover .dropdown-menu {
+      display: block; opacity:1; visibility:visible; transform: translateY(0);
+    }
+    /* Main */
+    main { flex:1; }
+    .intro-container {
+      display: flex; /* Usamos flexbox */
+      justify-content: space-between; /* Espacio entre los elementos */
+      max-width: 1200px;
+      margin: 3rem auto;
+      width: 90%;
+      flex-wrap: wrap; /* Permite que los elementos se ajusten a pantallas pequeñas */
+    }
+    .card {
+      background: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+      flex: 1 1 45%; /* El ancho será el 45% para más espacio */
+      margin-right: 2%; /* Añadimos margen entre tarjetas */
+    }
+    .card-header { background: transparent; border-bottom: none; padding-bottom:0; }
+    .card-title {
+      font-size: 1.75rem;
+      color: #0a0f2d;
+    }
+    .card-body p {
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+    }
+    /* Footer */
+    footer {
+      background-color: #F8F0E3;
+      border-top: 1px solid rgba(10,15,45,0.2);
+      color: #0a0f2d;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 0.9rem;
+    }
+    footer strong { color: #0a0f2d; }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado de operadores -->
+  <div class="operators-bg" id="opsBg"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand mx-auto" href="index.html">Tercera Ley de Newton</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link active" href="introduccion.html">Introducción</a></li>
+          <li class="nav-item"><a class="nav-link active" href="colision/colision.html">Simulación de Colision</a></li>
+          <li class="nav-item"><a class="nav-link active" href="Remo/Remo.html">Simulación de Remo</a></li>
+          <li class="nav-item"><a class="nav-link" href="/pagina principal/recuersos/video1/video.html">Video</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main>
+    <div class="intro-container">
+      <!-- Tarjeta Introducción con fórmulas -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Introducción</h2>
+        </div>
+        <div class="card-body">
+          <p>
+            La <strong>Tercera Ley de Newton</strong>, formulada por Isaac Newton en 1687, establece que <em>para cada acción existe una reacción igual y opuesta</em>. Esta ley es fundamental para entender las interacciones entre objetos y tiene una gran relevancia en la dinámica de cuerpos en movimiento. Matemáticamente, se expresa como:
+          </p>
+          <p style="text-align: center;">
+            \( \displaystyle \vec F_{12} = -\,\vec F_{21} \)
+          </p>
+          <p>
+            Esta ley no solo explica cómo interactúan los objetos entre sí, sino que también se relaciona con el <strong>impulso</strong> y el <strong>cambio de momento</strong>, conceptos fundamentales en la física clásica. El impulso es el cambio en el momento de un cuerpo y se describe por la siguiente ecuación:
+          </p>
+          <p style="text-align: center;">
+            \( \displaystyle J = \int_{t_0}^{t_1} \vec F \,dt = \Delta \vec p \)
+          </p>
+          <p>
+            La Tercera Ley de Newton tiene aplicaciones en una variedad de situaciones cotidianas, como en la acción y reacción de los motores de los cohetes, la interacción entre vehículos en colisiones y hasta en la dinámica de los deportes, donde las fuerzas de los jugadores interactúan con la pelota.
+          </p>
+        </div>
+      </div>
+      <!-- Tarjeta Objetivo con fórmulas de colisión -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Objetivo</h2>
+        </div>
+        <div class="card-body">
+          <p>
+            En nuestra simulación de colisión de bloques, aplicaremos la Tercera Ley para analizar la conservación
+            del <strong>momento lineal</strong> en choques unidimensionales:
+          </p>
+          <p style="text-align: center;">
+            \( \displaystyle m_1 v_{1,i} + m_2 v_{2,i} = m_1 v_{1,f} + m_2 v_{2,f} \)
+          </p>
+          <p>
+            Para colisiones elásticas, las velocidades finales vienen dadas por:
+          </p>
+          <p style="text-align: center;">
+            \( \displaystyle v_{1,f} = \frac{m_1 - m_2}{m_1 + m_2}\,v_{1,i} + \frac{2\,m_2}{m_1 + m_2}\,v_{2,i}, \)<br/>
+            \( \displaystyle v_{2,f} = \frac{2\,m_1}{m_1 + m_2}\,v_{1,i} - \frac{m_1 - m_2}{m_1 + m_2}\,v_{2,i}. \)
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>BY: <strong>Elian Galeas</strong>, <strong>Alexander Contreras</strong>, <strong>Milena Castro</strong>, <strong>Jose Choez</strong>, <strong>Jonathan Castro</strong></p>
+    <p>&copy; 2025 Física Interactiva</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Script operadores -->
+  <script>
+    const ops = ['+','-','×','÷'];
+    const bg = document.getElementById('opsBg');
+    for (let i = 0; i < 50; i++) {
+      const span = document.createElement('span');
+      span.className = 'operator';
+      span.textContent = ops[Math.floor(Math.random() * ops.length)];
+      span.style.left = Math.random() * 100 + 'vw';
+      span.style.animationDuration = (8 + Math.random() * 8) + 's';
+      span.style.animationDelay = '-' + Math.random() * 8 + 's';
+      bg.append(span);
+    }
+  </script>
+</body>
+</html>

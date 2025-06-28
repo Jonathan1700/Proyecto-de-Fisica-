@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Simulador de Remo - 5 Ejercicios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #5e72b0 75%, #bde6f1 100%);
+      min-height: 100vh;
+      font-family: 'Montserrat', sans-serif;
+      color: #253657;
+    }
+    .title {
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 2px 2px 8px #25365770;
+      text-align: center;
+      margin-top: 2rem;
+      letter-spacing: 0.5px;
+    }
+    .sim-card {
+      background: rgba(255,255,255,0.99);
+      border-radius: 1.4rem;
+      box-shadow: 0 8px 32px 0 #26327a25;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      transition: transform 0.17s;
+      border: 1.5px solid #dee3f2;
+    }
+    .sim-card:hover {
+      transform: translateY(-4px) scale(1.013);
+      box-shadow: 0 12px 40px 0 #70c6e885;
+    }
+    .sim-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #4378b4;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+    .case-label {
+      font-size: 1rem;
+      color: #295584;
+      margin-bottom: 0.6rem;
+      font-weight: 500;
+    }
+    .sim-anim {
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(90deg,#bbe6fa 75%,#e6f7ff 100%);
+      border-radius: 1rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+      border: 2.2px solid #a8dbfa;
+    }
+    .boat {
+      width: 53px; height: 38px;
+      position: absolute;
+      left: 4%;
+      bottom: 7px;
+      transition: left 1.4s cubic-bezier(.6,1.8,.2,.9);
+      z-index: 2;
+      filter: drop-shadow(0 2px 12px #00bfff45);
+    }
+    .boat svg {
+      width: 100%; height: 100%;
+      display: block;
+    }
+    .wave {
+      position: absolute;
+      left:0; bottom: 0; width:100%; height:15px;
+      background: repeating-linear-gradient(
+        120deg, #b9dbef 0 10px, #e3f4ff 10px 18px
+      );
+      border-radius: 0 0 1rem 1rem;
+      opacity: 0.65;
+    }
+    .formula-box {
+      background: #ecf2fb;
+      border-radius: 0.7rem;
+      padding: 0.7rem 1.2rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.09rem;
+      color: #274066;
+      border-left: 4px solid #6ab5e3;
+      margin-top: 0.4rem;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+    .formula-box .math {
+      font-size: 1.12em;
+      color: #23345a;
+      margin: 3px 0;
+      display: block;
+    }
+    .result-box {
+      background: #fafdff;
+      border-radius: 0.7rem;
+      padding: 0.88rem 1.2rem;
+      margin-top: 0.8rem;
+      font-size: 1.07rem;
+      min-height: 2rem;
+      color: #2b3b51;
+      border: 1px solid #ecf2fb;
+    }
+    .data-box {
+      background: #d1e8fa;
+      border-radius: 0.6rem;
+      padding: 0.5rem 1.1rem;
+      font-size: 1.04rem;
+      color: #285578;
+      margin-bottom: 0.8rem;
+      border-left: 4px solid #6ab5e3;
+    }
+    .btn-simular {
+      background: #4378b4;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.48rem 1.5rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 2px 10px #70c6e825;
+      transition: background 0.2s;
+    }
+    .btn-simular:hover {
+      background: #1f476b;
+      color: #ffe3b0;
+    }
+    .canal-final {
+      position: absolute;
+      right: 5px; bottom:10px;
+      width: 20px; height: 30px;
+      background: #e2c089;
+      border-radius: 9px 9px 5px 5px;
+      border: 1.8px solid #9e8254;
+      box-shadow: 0 1px 6px #ad94684a;
+      opacity: 0.75;
+    }
+    nav {
+      background: #f7f3ea;
+      border-bottom: 2px solid #e3e3e3;
+    }
+    .navbar-brand {
+      font-size: 2rem;
+      color: #111;
+      letter-spacing: 1px;
+    }
+    .nav-link {
+      color: #111;
+    }
+    .nav-link:hover {
+      color: #4378b4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand mx-auto fw-bold" href="../index.html">
+        Tercera Ley de Newton
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../introduccion.html">Introducción</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Simulación</a></li>
+          <li class="nav-item"><a class="nav-link" href="../ejercicios.html">Ejercicios</a></li>
+          <li class="nav-item"><a class="nav-link" href="../recuersos/video1/video.html">Video</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <h1 class="title">Mini Simulador de Remo<br>5 Ejercicios con Impulso y Barco</h1>
+  <div class="container mt-4 mb-5">
+    <div class="row g-4" id="ejercicios-row">
+      <!-- Generado por JS -->
+    </div>
+  </div>
+
+  <script>
+    // Datos de los ejercicios
+    const ejercicios = [
+      {
+        titulo: "Ejercicio 1: Remo suave y largo",
+        descripcion: "El remero aplica poca fuerza pero durante más tiempo.",
+        datos: { masaBote: 35, masaRemero: 70, fuerzaRemo: 100, tiempoRemada: 0.8 }
+      },
+      {
+        titulo: "Ejercicio 2: Barco pesado, remada potente",
+        descripcion: "Un bote grande requiere más fuerza pero es más difícil de acelerar.",
+        datos: { masaBote: 55, masaRemero: 60, fuerzaRemo: 180, tiempoRemada: 0.4 }
+      },
+      {
+        titulo: "Ejercicio 3: Remero fuerte y pesado",
+        descripcion: "Mayor masa total pero también más fuerza aplicada.",
+        datos: { masaBote: 45, masaRemero: 80, fuerzaRemo: 130, tiempoRemada: 0.65 }
+      },
+      {
+        titulo: "Ejercicio 4: Adolescente en bote liviano",
+        descripcion: "Remada constante y suave en un bote muy ligero.",
+        datos: { masaBote: 30, masaRemero: 55, fuerzaRemo: 75, tiempoRemada: 1.1 }
+      },
+      {
+        titulo: "Ejercicio 5: Remero muy fuerte",
+        descripcion: "Remada corta pero potente en bote mediano.",
+        datos: { masaBote: 40, masaRemero: 90, fuerzaRemo: 210, tiempoRemada: 0.6 }
+      }
+    ];
+
+    function crearEjercicios() {
+      let html = "";
+      ejercicios.forEach((ej, idx) => {
+        const d = ej.datos;
+        html += `
+          <div class="col-md-6">
+            <div class="sim-card">
+              <div class="sim-title">${ej.titulo}</div>
+              <div class="case-label">${ej.descripcion}</div>
+              <div class="data-box">
+                <b>Masa del bote:</b> ${d.masaBote} kg<br>
+                <b>Masa del remero:</b> ${d.masaRemero} kg<br>
+                <b>Fuerza aplicada:</b> ${d.fuerzaRemo} N<br>
+                <b>Tiempo de remada:</b> ${d.tiempoRemada} s
+              </div>
+              <div class="formula-box">
+                <div><b>Fórmulas utilizadas:</b></div>
+                <span class="math">Impulso: <span style="color:#1976d2;">I = F × t</span></span>
+                <span class="math">Velocidad final: <span style="color:#1976d2;">v = I / m<sub>total</sub></span></span>
+                <span class="math" style="font-size:0.98em;">donde m<sub>total</sub> = masa del bote + masa del remero</span>
+              </div>
+              <div class="sim-anim" id="simulacion${idx}">
+                <div class="boat" id="boat${idx}">
+                  <svg viewBox="0 0 50 35">
+                    <ellipse cx="25" cy="30" rx="22" ry="5" fill="#3781c7" opacity="0.33"/>
+                    <rect x="7" y="15" width="36" height="10" rx="4.5" fill="#cf9249" stroke="#7e4d17" stroke-width="2"/>
+                    <ellipse cx="25" cy="18" rx="9" ry="4" fill="#ffe3a2" stroke="#bb911d" stroke-width="1"/>
+                    <rect x="24" y="7" width="2" height="13" rx="0.7" fill="#5274c1"/>
+                    <ellipse cx="25" cy="7" rx="3.3" ry="3.3" fill="#fed88e" stroke="#b09c58" stroke-width="1"/>
+                    <!-- Remo -->
+                    <rect x="36" y="12" width="11" height="2.1" rx="1.1" fill="#e1c95b" transform="rotate(10 36 13)"/>
+                  </svg>
+                </div>
+                <div class="wave"></div>
+                <div class="canal-final"></div>
+              </div>
+              <button class="btn-simular" onclick="simularRemo(${idx})">Simular</button>
+              <div class="result-box" id="resultado${idx}"></div>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('ejercicios-row').innerHTML = html;
+    }
+
+    // Mini simulación y resultados explicativos
+    function simularRemo(idx){
+      const d = ejercicios[idx].datos;
+      const masaTotal = d.masaBote + d.masaRemero;
+      const impulso = d.fuerzaRemo * d.tiempoRemada;
+      const vFinal = impulso / masaTotal;
+      let boat = document.getElementById(`boat${idx}`);
+      boat.style.left = '4%';
+      setTimeout(()=>{
+        let dist = Math.min(80, 18 + vFinal*56); // Máximo 80%
+        boat.style.left = dist + '%';
+      },160);
+
+      setTimeout(()=>{
+        document.getElementById(`resultado${idx}`).innerHTML =
+          `<b>Resultados del caso:</b><br>
+          Impulso aplicado (I): <b>${impulso.toFixed(2)} N·s</b><br>
+          Masa total (bote + remero): <b>${masaTotal} kg</b><br>
+          Velocidad final del bote: <b>${vFinal.toFixed(2)} m/s</b><br>
+          <span style="color:#0b4870;font-size:0.98em;">
+            <b>Interpretación:</b> El impulso entregado por el remo genera una velocidad final en el conjunto barco-remero. 
+            A mayor impulso y menor masa total, mayor velocidad se obtiene.
+          </span>`;
+      }, 1220);
+
+      setTimeout(()=>{ boat.style.left = '4%'; document.getElementById(`resultado${idx}`).innerHTML = ''; },3700);
+    }
+
+    window.onload = crearEjercicios;
+  </script>
+</body>
+</html>
