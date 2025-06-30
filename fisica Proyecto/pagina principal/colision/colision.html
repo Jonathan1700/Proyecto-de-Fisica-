@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulación Interactiva - Tercera Ley de Newton</title>
+  <!-- Google Font Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      background-color: #F8F0E3;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+    }
+    .operators-bg {
+      position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
+    }
+    .operator {
+      position: absolute;
+      font-size: 3.6rem;
+      color: rgba(10,15,45,0.28);
+      animation: moveOp linear infinite;
+      font-family: 'Montserrat', serif;
+      font-weight: bold;
+    }
+    @keyframes moveOp {
+      0% { transform: translateY(120vh); opacity: 0; }
+      10% { opacity: 0.28; }
+      100% { transform: translateY(-12vh); opacity: 0; }
+    }
+    body > * { position: relative; z-index:1; }
+    .main-container {
+      max-width: 1200px;
+      margin: 40px auto 0 auto;
+      background: #ffffffee;
+      border-radius: 24px;
+      box-shadow: 0 8px 44px #d7cebca8;
+      padding: 35px 28px 28px 28px;
+      border: 2px solid #ded2bb66;
+      position: relative;
+    }
+    h1, .panel-title { color: #0a0f2d; font-weight: 800; }
+    canvas {
+      background: linear-gradient(90deg, #f2e8d7 0%, #f5efe7 100%);
+      border: 2.2px solid #dab878;
+      border-radius: 18px;
+      box-shadow: 0 2px 28px #dbcba855;
+      margin-bottom: 26px;
+      display: block;
+      margin-left: auto; margin-right: auto;
+      transition: box-shadow 0.14s;
+      z-index: 2;
+    }
+    .sim-panel, .results-panel {
+      background: #fff8e7ee;
+      border-radius: 15px;
+      box-shadow: 0 2px 18px #f4e7c421;
+      padding: 26px 16px 17px 16px;
+      margin-bottom: 22px;
+      border: 1.5px solid #e5e0c1;
+    }
+    .sim-panel input[type="number"] {
+      width: 80px;
+      background: #f5ede1;
+      color: #966c20;
+      border: 1.3px solid #dab878;
+      border-radius: 8px;
+    }
+    .sim-panel label, .form-check-label { color: #795200;}
+    .form-check-input:checked { background-color: #ffbf00; border-color: #c99a14;}
+    .btn-warning {
+      background-color: #f7b800 !important;
+      color: #fff !important;
+      border: none;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 8px;
+    }
+    .btn-warning:hover {
+      background-color: #e5a800 !important;
+      color: #fff !important;
+    }
+    .btn-outline-dark { border-color: #f2c13c; color:#795200; }
+    .btn-outline-dark:hover { background:#fff6df; }
+    .slider-row {
+      margin: 12px 0 12px 0;
+      color: #a47819;
+      font-size: 1.08rem;
+      display: flex; align-items: center;
+    }
+    .slider-row input[type="range"] {
+      flex: 1; margin: 0 10px;
+      accent-color: #f8b700;
+    }
+    .camera-btn {
+      background: #fff7e4;
+      border: 1.2px solid #b89e4e;
+      color: #f7b800;
+      border-radius: 13px;
+      font-size: 1.12rem;
+      margin-left: 12px;
+      padding: 4px 13px 4px 10px;
+      transition: all 0.14s;
+    }
+    .camera-btn.active, .camera-btn:active {
+      background: #f7b800;
+      color: #fff6e3;
+      border-color: #b89e4e;
+      font-weight: bold;
+    }
+    .chart-section {
+      background: #fff6e4f2;
+      border-radius: 17px;
+      padding: 15px 13px 13px 13px;
+      box-shadow: 0 2px 16px #eadca044;
+      margin-bottom: 18px;
+      border: 1.5px solid #f7e0a899;
+    }
+    .chart-title {
+      color: #e4a900;
+      font-weight: 700;
+      font-size: 1.12rem;
+      margin-bottom: 11px;
+      letter-spacing: 0.4px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .tooltip-fx {
+      cursor: pointer;
+      border-bottom: 1px dashed #b89e4e;
+      position: relative;
+      z-index: 4;
+    }
+    .tooltip-fx:hover:after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0; bottom: 120%;
+      background: #f6e5c0;
+      color: #a47819;
+      border-radius: 10px;
+      padding: 7px 15px;
+      font-size: 1.04rem;
+      min-width: 180px;
+      max-width: 350px;
+      box-shadow: 0 2px 10px #e1c37122;
+      white-space: pre-line;
+      z-index: 8;
+      opacity: .97;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .report-box {
+      border: 1.5px solid #f7b800bb;
+      border-radius: 14px;
+      margin: 20px 0 11px 0;
+      padding: 17px 17px 12px 17px;
+      background: #fffdf7;
+      box-shadow: 0 2px 13px #dab87822;
+      position: relative;
+    }
+    .datos-iniciales {
+      background: #f8f4eb;
+      border-left: 6px solid #e4a900;
+      padding: 14px 15px 11px 18px;
+      margin-bottom: 10px;
+      border-radius: 10px 15px 15px 10px;
+      font-size: 1.07rem;
+      color: #7d5517;
+    }
+    .list-group-item {
+      background: transparent;
+      border: none;
+      padding-left: 0;
+      font-size: 1.1rem;
+      color: #af8f42;
+    }
+    .modal-dialog {
+      max-width: 600px !important;
+    }
+    .modal-content {
+      background: #fffbe6;
+      border-radius: 20px;
+      border: 1.7px solid #e4a90033;
+      padding: 2rem 2rem 1.5rem 2rem;
+      box-shadow: 0 10px 44px #e8d88d22;
+    }
+    .mathjax-card .display-6 {
+      color: #0a0f2d;
+      max-width: 100%;
+      overflow-x: auto;
+      font-size: 2.15rem;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 700px) {
+      .modal-dialog { max-width:95vw !important;}
+      .modal-content { padding: 1.2rem 0.6rem 1.1rem 0.6rem;}
+      .mathjax-card .display-6 { font-size:1.15rem;}
+    }
+    @media (max-width: 900px) {
+      .main-container { padding: 10px; }
+      .sim-panel, .results-panel { padding: 11px 3px; }
+      .datos-iniciales { font-size: 0.98rem; }
+      .report-box { padding: 8px 4px; }
+      .chart-section { padding: 6px 2px 6px 2px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo operadores -->
+  <div class="operators-bg" id="opsBg"></div>
+  <!-- Navbar común -->
+  <nav class="navbar navbar-expand-lg" style="background-color:#F8F0E3; border-bottom:1px solid rgba(10,15,45,0.2);">
+    <div class="container">
+      <a class="navbar-brand mx-auto" href="index.html" style="font-weight:700; font-size:1.75rem; color:#0a0f2d!important;">
+        Tercera Ley de Newton
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/pagina principal/introduccion.html">Introducción</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/pagina principal/Remo/Remo.html">Simulación del Remo </a></li>
+          <li class="nav-item"><a class="nav-link" href="/pagina principal/recuersos/video1/video.html">Video</a></li>
+          <li class="nav-item"><a class="nav-link" href="/pagina principal/ejercicios.html">Preestablecidos</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Simulación y paneles -->
+  <div class="main-container mt-4 mb-4">
+    <h1 class="text-center mb-3">Simulación Interactiva de la Tercera Ley de Newton</h1>
+    <canvas id="simulationCanvas" width="980" height="240"></canvas>
+    <div class="slider-row mb-1">
+      <i class="bi bi-speedometer"></i> Velocidad de simulación
+      <input id="speedSlider" type="range" min="0.1" max="2.5" value="1" step="0.05">
+      <span id="speedValue">1.0x</span>
+      <button type="button" id="camSlow" class="camera-btn" title="Cámara lenta">
+        <i class="bi bi-skip-backward"></i> Cam. lenta
+      </button>
+      <button type="button" class="btn btn-outline-dark ms-3" data-bs-toggle="modal" data-bs-target="#formulasModal">
+        <i class="bi bi-lightbulb"></i> Ver fórmulas
+      </button>
+    </div>
+    <div class="row">
+      <div class="col-md-7">
+        <div class="sim-panel mb-3">
+          <h2 class="panel-title fs-5 mb-3">Configuración</h2>
+          <form id="configForm">
+            <div class="mb-2 d-flex align-items-center">
+              <label class="form-label">Masa Bloque A (kg):</label>
+              <input type="number" class="form-control form-control-sm ms-2" id="massA" value="10" step="0.1" min="0.1"/>
+            </div>
+            <div class="mb-2 d-flex align-items-center">
+              <label class="form-label">Velocidad Bloque A (m/s):</label>
+              <input type="number" class="form-control form-control-sm ms-2" id="velA" value="5" step="0.1"/>
+            </div>
+            <div class="mb-2 d-flex align-items-center">
+              <label class="form-label">Masa Bloque B (kg):</label>
+              <input type="number" class="form-control form-control-sm ms-2" id="massB" value="11" step="0.1" min="0.1"/>
+            </div>
+            <div class="mb-2 d-flex align-items-center">
+              <label class="form-label">Velocidad Bloque B (m/s):</label>
+              <input type="number" class="form-control form-control-sm ms-2" id="velB" value="5" step="0.1"/>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="bounceWalls" checked>
+              <label class="form-check-label" for="bounceWalls">Rebotar en bordes</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="showDeceleration" checked>
+              <label class="form-check-label" for="showDeceleration">Mostrar desaceleración</label>
+            </div>
+            <div class="mt-3">
+              <button type="button" id="btnStart" class="btn btn-warning me-2" onclick="startSimulation()"><i class="bi bi-play-fill"></i> Iniciar Simulación</button>
+              <button type="button" class="btn btn-outline-dark me-2" onclick="resumeSimulation()"><i class="bi bi-play-circle"></i> Reanudar</button>
+              <button type="button" class="btn btn-outline-dark me-2" onclick="stopSimulation()"><i class="bi bi-pause-fill"></i> Detener</button>
+              <button type="button" class="btn btn-outline-dark" onclick="resetAll()"><i class="bi bi-arrow-clockwise"></i> Reiniciar Todo</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="results-panel">
+          <h2 class="panel-title fs-5 mb-3">Resultados</h2>
+          <ul id="resultsList" class="list-group list-group-flush">
+            <li class="list-group-item"><span class="tooltip-fx" data-tooltip="Número total de colisiones en la simulación."><strong>Colisiones:</strong></span> <span id="collisionCount">0</span></li>
+            <li class="list-group-item"><span class="tooltip-fx" data-tooltip="Velocidad final de Bloque A después de la última colisión."><strong>Velocidad final A:</strong></span> <span id="finalVelA">--</span> m/s</li>
+            <li class="list-group-item"><span class="tooltip-fx" data-tooltip="Velocidad final de Bloque B después de la última colisión."><strong>Velocidad final B:</strong></span> <span id="finalVelB">--</span> m/s</li>
+            <li class="list-group-item"><span class="tooltip-fx" data-tooltip="Diferencia de velocidad (ΔV) de Bloque A tras la última colisión."><strong>Desaceleración A:</strong></span> <span id="accelA">--</span> m/s²</li>
+            <li class="list-group-item"><span class="tooltip-fx" data-tooltip="Diferencia de velocidad (ΔV) de Bloque B tras la última colisión."><strong>Desaceleración B:</strong></span> <span id="accelB">--</span> m/s²</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Gráficos de la simulación -->
+    <div class="chart-section" id="chartsSection" style="display:none;">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="chart-title tooltip-fx" data-tooltip="Cada punto es la velocidad tras la colisión. Sirve para comparar cómo la energía se transfiere entre bloques."><i class="bi bi-activity"></i> Velocidades tras cada colisión</div>
+          <canvas id="velocitiesChart" height="220"></canvas>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="chart-title tooltip-fx" data-tooltip="El cambio de velocidad (ΔV) tras cada colisión: mide el impacto de cada choque."><i class="bi bi-graph-down"></i> Desaceleración tras cada colisión</div>
+          <canvas id="decelerationsChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+    <!-- Reporte de la simulación -->
+    <div id="currentSimulationReports" class="mt-3">
+      <h2 class="panel-title fs-5 mb-3"><i class="bi bi-file-earmark-bar-graph"></i> Reporte de la simulación más reciente</h2>
+    </div>
+  </div>
+  <!-- MODAL FÓRMULAS (MathJax) -->
+  <div class="modal fade" id="formulasModal" tabindex="-1" aria-labelledby="formulasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content mathjax-card">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title mx-auto fw-bold" id="formulasModalLabel">Fórmulas de la Simulación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pb-2 pt-0">
+          <div class="mb-3 text-center">
+            <span class="badge rounded-pill bg-warning text-dark mb-2" style="font-size:1rem">Velocidad después de la colisión</span>
+            <div class="display-6 mb-2" style="font-family:'Montserrat',serif;">
+              $$ v'_A = \frac{(m_A - m_B)\,v_A + 2\,m_B\,v_B}{m_A + m_B} $$
+              $$ v'_B = \frac{(m_B - m_A)\,v_B + 2\,m_A\,v_A}{m_A + m_B} $$
+            </div>
+            <div class="text-muted small text-start">
+              <ul class="mb-1">
+                <li><strong>\(v_A, v_B\):</strong> velocidad inicial de cada bloque</li>
+                <li><strong>\(m_A, m_B\):</strong> masa de cada bloque</li>
+                <li><strong>\(v'_A, v'_B\):</strong> velocidad después de la colisión</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mb-2 text-center">
+            <span class="badge rounded-pill bg-warning text-dark mb-2" style="font-size:1rem">Desaceleración instantánea (ΔV)</span>
+            <div class="display-6 mb-2" style="font-family:'Montserrat',serif;">
+              $$ \Delta V = v_{final} - v_{inicial} $$
+            </div>
+            <div class="text-muted small text-start">
+              <ul class="mb-1">
+                <li><strong>\(v_{final}\):</strong> velocidad tras la colisión</li>
+                <li><strong>\(v_{inicial}\):</strong> velocidad antes de la colisión</li>
+                <li><strong>\(\Delta V\):</strong> variación de la velocidad (desaceleración/aceleración)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="alert alert-info mt-3 text-center" style="font-size:1.02rem">
+            <i class="bi bi-info-circle-fill"></i> <strong>Tip:</strong>
+            En una colisión perfectamente elástica, la energía cinética total se conserva.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer bonito -->
+  <footer class="text-center mt-4 pb-2" style="background:#fffbe6; border-top:1.5px solid #e4a90033; color:#0a0f2d;">
+    <div style="font-size:1.02rem">BY: <strong>Elian Galeas</strong>, <strong>Alexander Contreras</strong>, <strong>Milena Castro</strong>, <strong>Jose Choez</strong>, <strong>Jonathan Castro</strong></div>
+    <div class="text-muted" style="font-size:0.97rem;">&copy; 2025 Física Interactiva</div>
+  </footer>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- OPERADORES ANIMADOS -->
+  <script>
+    const ops = ['+','-','×','÷'];
+    const bg = document.getElementById('opsBg');
+    for (let i = 0; i < 90; i++) {
+      const span = document.createElement('span');
+      span.className = 'operator';
+      span.textContent = ops[Math.floor(Math.random() * ops.length)];
+      span.style.left = Math.random() * 100 + 'vw';
+      span.style.animationDuration = (8 + Math.random() * 8) + 's';
+      span.style.animationDelay = '-' + Math.random() * 8 + 's';
+      bg.append(span);
+    }
+  </script>
+  <!-- SIMULACIÓN JS (texto no se duplica y velocidad B siempre negativa) -->
+  <script>
+    const canvas = document.getElementById('simulationCanvas');
+    const ctx = canvas.getContext('2d');
+    let blockA, blockB, animationId;
+    let bounceWalls = true;
+    let showDeceleration = true;
+    let simulationRunning = false;
+    let collisionCount = 0;
+    let collisionHandled = false;
+    let collisionData = [];
+    const MAX_COLLISIONS = 5;
+    let velocitiesChart, decelerationsChart;
+    let simulationSpeed = 1;
+    let vibrateTimer = 0, vibrateActive = false;
+    const miniWidth = 170, miniHeight = 40;
+
+    function getBlockSize(mass) {
+      if (mass < 25) return { width: 32, height: 32, label: 'Muy pequeño' };
+      else if (mass < 100) return { width: 50, height: 40, label: 'Pequeño' };
+      else if (mass < 300) return { width: 70, height: 55, label: 'Mediano' };
+      else if (mass < 1000) return { width: 100, height: 70, label: 'Grande' };
+      else return { width: 130, height: 80, label: 'Muy grande' };
+    }
+    function getMiniSize(mass) {
+      if (mass < 25) return { w: 8, h: 8 };
+      else if (mass < 100) return { w: 16, h: 14 };
+      else if (mass < 300) return { w: 22, h: 16 };
+      else if (mass < 1000) return { w: 29, h: 22 };
+      else return { w: 36, h: 28 };
+    }
+    function createMiniSnapshot(col) {
+      const miniCanvas = document.createElement('canvas');
+      miniCanvas.width = miniWidth;
+      miniCanvas.height = miniHeight;
+      const miniCtx = miniCanvas.getContext('2d');
+      miniCtx.fillStyle = '#f7edd9';
+      miniCtx.fillRect(0, 0, miniWidth, miniHeight);
+      const sizeAMini = getMiniSize(col.mA);
+      const sizeBMini = getMiniSize(col.mB);
+      let posAX = (parseFloat(col.posA) / 980) * miniWidth;
+      let posBX = (parseFloat(col.posB) / 980) * miniWidth;
+      if (Math.abs(posBX - posAX) < sizeAMini.w) {
+        if (posBX > posAX) posBX = posAX + sizeAMini.w;
+        else posAX = posBX + sizeBMini.w;
+      }
+      posAX = Math.min(posAX, miniWidth - sizeAMini.w);
+      posBX = Math.min(posBX, miniWidth - sizeBMini.w);
+      miniCtx.shadowColor = "#f7b800";
+      miniCtx.shadowBlur = 6;
+      miniCtx.fillStyle = '#b2a418';
+      miniCtx.fillRect(posAX, 11, sizeAMini.w, sizeAMini.h);
+      miniCtx.fillStyle = '#e4a900';
+      miniCtx.fillRect(posBX, 11, sizeBMini.w, sizeBMini.h);
+      miniCtx.shadowBlur = 0;
+      return miniCanvas.toDataURL();
+    }
+    function startSimulation() {
+      if (simulationRunning) { alert("Debes detener la simulación actual antes de iniciar una nueva."); return; }
+      // Validación de inputs
+      const massAInput = document.getElementById('massA').value.trim();
+      const velAInput = document.getElementById('velA').value.trim();
+      const massBInput = document.getElementById('massB').value.trim();
+      let velBInput = document.getElementById('velB').value.trim();
+      if (massAInput === '' || velAInput === '' || massBInput === '' || velBInput === '') {
+        alert("Debes ingresar valores en todos los campos: masa y velocidad de ambos bloques."); return;
+      }
+      const massA = parseFloat(massAInput), velA = parseFloat(velAInput),
+            massB = parseFloat(massBInput);
+      // Siempre interpreta la velocidad de B como negativa
+      let velB = parseFloat(velBInput);
+      if (!isNaN(velB) && velB > 0) velB = -velB;
+      if (isNaN(massA) || massA <= 0) { alert("La masa del Bloque A debe ser mayor que cero."); return; }
+      if (isNaN(massB) || massB <= 0) { alert("La masa del Bloque B debe ser mayor que cero."); return; }
+      if (isNaN(velA) || isNaN(velB)) { alert("Las velocidades deben ser valores numéricos."); return; }
+      bounceWalls = document.getElementById('bounceWalls').checked;
+      showDeceleration = document.getElementById('showDeceleration').checked;
+      const sizeA = getBlockSize(massA), sizeB = getBlockSize(massB);
+      blockA = { x: 180, v: velA, m: massA, color: '#b2a418', a: 0, label: 'Bloque A', width: sizeA.width, height: sizeA.height, sizeLabel: sizeA.label };
+      blockB = { x: 730, v: velB, m: massB, color: '#e4a900', a: 0, label: 'Bloque B', width: sizeB.width, height: sizeB.height, sizeLabel: sizeB.label };
+      document.getElementById('finalVelA').textContent = '--';
+      document.getElementById('finalVelB').textContent = '--';
+      document.getElementById('accelA').textContent = '--';
+      document.getElementById('accelB').textContent = '--';
+      document.getElementById('collisionCount').textContent = '0';
+      collisionCount = 0; collisionData = [];
+      simulationRunning = true; vibrateActive = false; vibrateTimer = 0;
+      document.getElementById('btnStart').disabled = true;
+      document.getElementById("chartsSection").style.display = "none";
+      animate();
+    }
+    function resumeSimulation() {
+      if (!simulationRunning) {
+        const massAInput = document.getElementById('massA').value.trim();
+        const velAInput = document.getElementById('velA').value.trim();
+        const massBInput = document.getElementById('massB').value.trim();
+        let velBInput = document.getElementById('velB').value.trim();
+        if (massAInput !== '' && !isNaN(parseFloat(massAInput)) && parseFloat(massAInput) > 0) {
+          blockA.m = parseFloat(massAInput); const newSizeA = getBlockSize(blockA.m);
+          blockA.width = newSizeA.width; blockA.height = newSizeA.height; blockA.sizeLabel = newSizeA.label;
+        }
+        if (velAInput !== '' && !isNaN(parseFloat(velAInput))) { blockA.v = parseFloat(velAInput);}
+        if (massBInput !== '' && !isNaN(parseFloat(massBInput)) && parseFloat(massBInput) > 0) {
+          blockB.m = parseFloat(massBInput); const newSizeB = getBlockSize(blockB.m);
+          blockB.width = newSizeB.width; blockB.height = newSizeB.height; blockB.sizeLabel = newSizeB.label;
+        }
+        // Siempre negativa la velocidad de B
+        let velB = parseFloat(velBInput);
+        if (!isNaN(velB) && velB > 0) velB = -velB;
+        if (velBInput !== '' && !isNaN(velB)) { blockB.v = velB;}
+        bounceWalls = document.getElementById('bounceWalls').checked;
+        showDeceleration = document.getElementById('showDeceleration').checked;
+        simulationRunning = true;
+        document.getElementById('btnStart').disabled = true;
+        animate();
+      }
+    }
+    function stopSimulation() {
+      simulationRunning = false;
+      cancelAnimationFrame(animationId);
+      document.getElementById('btnStart').disabled = false;
+    }
+    function finishSimulation() {
+      if (collisionData.length > 0) {
+        updateSimulationReports();
+        simulationRunning = false;
+        document.getElementById('btnStart').disabled = false;
+      }
+    }
+    function animateCounter(id, val, decimals=2, duration=400) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const start = parseFloat(el.textContent.replace(/[^0-9\-.]/g, "")) || 0;
+      const end = parseFloat(val);
+      if (isNaN(end)) { el.textContent = val; return; }
+      const startTime = performance.now();
+      function frame(now) {
+        let t = (now - startTime) / duration;
+        if (t>1) t=1;
+        let current = start + (end - start)*t;
+        el.textContent = current.toFixed(decimals);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    function vibrateBlocks() {
+      vibrateActive = true;
+      vibrateTimer = 10;
+    }
+    function drawBlock(block, vibrate=false) {
+      ctx.save();
+      if (vibrate && vibrateActive && vibrateTimer > 0) {
+        let dx = (Math.random()-0.5)*8, dy = (Math.random()-0.5)*6;
+        ctx.translate(dx, dy);
+      }
+      ctx.shadowColor = "#f7b800";
+      ctx.shadowBlur = vibrate ? 25 : 13;
+      ctx.fillStyle = block.color;
+      ctx.fillRect(block.x, 110, block.width, block.height);
+      // Este bloque Centra nuestro Label y ajusta su tamaño
+      ctx.fillStyle = '#846715';
+      ctx.font = '15px Montserrat';
+      ctx.textAlign = "center";
+      ctx.fillText(block.label, block.x + block.width/2, 105);
+      ctx.font = '15px Montserrat';
+      ctx.fillText(block.sizeLabel, block.x + block.width/2, 110 + block.height + 22);
+      ctx.textAlign = "start";
+      ctx.restore();
+    }
+    let lastFrame = 0;
+    function animate(now=0) {
+      if (!simulationRunning) return;
+      let elapsed = (now - lastFrame) || 16;
+      lastFrame = now;
+      let dt = simulationSpeed * (elapsed/16.6667);
+      if (dt > 3) dt = 1.5;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBlock(blockA, vibrateActive);
+      drawBlock(blockB, vibrateActive);
+      blockA.x += blockA.v * dt;
+      blockB.x += blockB.v * dt;
+      if (bounceWalls) {
+        if (blockA.x < 0) { blockA.x = 0; blockA.v *= -1;}
+        else if (blockA.x > canvas.width - blockA.width) { blockA.x = canvas.width - blockA.width; blockA.v *= -1;}
+        if (blockB.x < 0) { blockB.x = 0; blockB.v *= -1;}
+        else if (blockB.x > canvas.width - blockB.width) { blockB.x = canvas.width - blockB.width; blockB.v *= -1;}
+      }
+      const distanciaMinima = Math.max(blockA.width, blockB.width);
+      if (Math.abs(blockA.x - blockB.x) <= distanciaMinima && !collisionHandled) {
+        const v1 = ((blockA.m - blockB.m) * blockA.v + 2 * blockB.m * blockB.v) / (blockA.m + blockB.m);
+        const v2 = ((blockB.m - blockA.m) * blockB.v + 2 * blockA.m * blockA.v) / (blockA.m + blockB.m);
+        blockA.a = v1 - blockA.v;
+        blockB.a = v2 - blockB.v;
+        blockA.v = v1;
+        blockB.v = v2;
+        const maxVel = 300;
+        blockA.v = Math.max(Math.min(blockA.v, maxVel), -maxVel);
+        blockB.v = Math.max(Math.min(blockB.v, maxVel), -maxVel);
+        collisionCount++;
+        collisionData.push({
+          num: collisionCount,
+          posA: blockA.x.toFixed(2),
+          velA: blockA.v.toFixed(2),
+          accA: blockA.a.toFixed(2),
+          posB: blockB.x.toFixed(2),
+          velB: blockB.v.toFixed(2),
+          accB: blockB.a.toFixed(2),
+          mA: blockA.m,
+          mB: blockB.m
+        });
+        animateCounter('finalVelA', blockA.v);
+        animateCounter('finalVelB', blockB.v);
+        animateCounter('accelA', blockA.a);
+        animateCounter('accelB', blockB.a);
+        animateCounter('collisionCount', collisionCount, 0, 350);
+        collisionHandled = true;
+        vibrateBlocks();
+      }
+      if (Math.abs(blockA.x - blockB.x) > distanciaMinima + 1) {
+        collisionHandled = false;
+      }
+      if (vibrateActive && vibrateTimer > 0) { vibrateTimer--; }
+      else vibrateActive = false;
+      if (collisionCount >= MAX_COLLISIONS) {
+        simulationRunning = false;
+        setTimeout(()=>alert("Se alcanzó el límite de colisiones (5) para esta simulación. Consulta el reporte abajo."), 200);
+        finishSimulation();
+        return;
+      }
+      animationId = requestAnimationFrame(animate);
+    }
+    function updateSimulationReports() {
+      const container = document.getElementById('currentSimulationReports');
+      container.innerHTML = '<h2 class="panel-title fs-5 mb-3"><i class="bi bi-file-earmark-bar-graph"></i> Reporte de la simulación más reciente</h2>';
+      if (collisionData.length === 0) {
+        container.innerHTML += '<p class="text-muted">Aún no hay simulación finalizada.</p>';
+        document.getElementById("chartsSection").style.display = "none";
+        return;
+      }
+      let bloqueAinicial = collisionData[0], bloqueBinicial = collisionData[0];
+      container.innerHTML += `
+        <div class="datos-iniciales">
+          <span class="block-label" style="color:#b2a418">Bloque A</span>
+          — Masa: <b>${bloqueAinicial.mA}</b> kg, Velocidad inicial: <b>${parseFloat(document.getElementById('velA').value).toFixed(2)}</b> m/s<br>
+          <span class="block-label" style="color:#e4a900">Bloque B</span>
+          — Masa: <b>${bloqueBinicial.mB}</b> kg, Velocidad inicial: <b>${parseFloat(document.getElementById('velB').value) > 0 ? -parseFloat(document.getElementById('velB').value).toFixed(2) : parseFloat(document.getElementById('velB').value).toFixed(2)}</b> m/s
+        </div>
+      `;
+      collisionData.forEach(col => {
+        const imgSrc = createMiniSnapshot(col);
+        container.innerHTML += `
+          <div class="report-box mb-2">
+            <div class="sim-label mb-1"><i class="bi bi-arrow-repeat"></i> Colisión ${col.num}</div>
+            <div class="row align-items-center">
+              <div class="col-sm-3 text-center">
+                <img src="${imgSrc}" style="max-width: 100%; box-shadow:0 1px 6px #b89e4e88;">
+              </div>
+              <div class="col-sm-9">
+                <b style="color:#b2a418">Bloque A</b> (${getBlockSize(col.mA).label}):<br>
+                <span class="block-label">Posición:</span> <span class="tooltip-fx" data-tooltip="Distancia (en píxeles del canvas) respecto al borde izquierdo.">${col.posA} px</span><br>
+                <span class="block-label">Velocidad tras colisión:</span> <span class="tooltip-fx" data-tooltip="Velocidad calculada usando la fórmula de colisión elástica.">${col.velA} m/s</span><br>
+                <span class="block-label">Desaceleración (ΔV):</span> <span class="tooltip-fx" data-tooltip="Diferencia de velocidad antes y después de la colisión.">${col.accA} m/s²</span>
+                <hr class="my-1">
+                <b style="color:#e4a900">Bloque B</b> (${getBlockSize(col.mB).label}):<br>
+                <span class="block-label">Posición:</span> <span class="tooltip-fx" data-tooltip="Distancia (en píxeles del canvas) respecto al borde izquierdo.">${col.posB} px</span><br>
+                <span class="block-label">Velocidad tras colisión:</span> <span class="tooltip-fx" data-tooltip="Velocidad calculada usando la fórmula de colisión elástica.">${col.velB} m/s</span><br>
+                <span class="block-label">Desaceleración (ΔV):</span> <span class="tooltip-fx" data-tooltip="Diferencia de velocidad antes y después de la colisión.">${col.accB} m/s²</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById("chartsSection").style.display = "block";
+      const colisionesLabels = collisionData.map(col => "Colisión " + col.num);
+      const velocidadesA = collisionData.map(col => col.velA);
+      const velocidadesB = collisionData.map(col => col.velB);
+      const desacA = collisionData.map(col => col.accA);
+      const desacB = collisionData.map(col => col.accB);
+      if (velocitiesChart) { velocitiesChart.destroy(); }
+      if (decelerationsChart) { decelerationsChart.destroy(); }
+      const ctxVel = document.getElementById('velocitiesChart').getContext('2d');
+      velocitiesChart = new Chart(ctxVel, {
+        type: 'line',
+        data: {
+          labels: colisionesLabels,
+          datasets: [
+            {
+              label: 'Bloque A',
+              data: velocidadesA,
+              borderColor: '#b2a418',
+              backgroundColor: '#fff6c18c',
+              tension: 0.33,
+              pointRadius: 5,
+              fill: false
+            },
+            {
+              label: 'Bloque B',
+              data: velocidadesB,
+              borderColor: '#e4a900',
+              backgroundColor: '#ffe7a6bb',
+              tension: 0.33,
+              pointRadius: 5,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#967410', font: {size:14} }, },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y} m/s — Velocidad tras la colisión (${ctx.label})`;
+                },
+                afterBody: () => "La velocidad se calcula según las masas y las velocidades iniciales."
+              },
+              backgroundColor: "#fcf4de", titleColor: "#b2a418", bodyColor: "#7d5517"
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#b3a36a' } },
+            y: { ticks: { color: '#b3a36a' } }
+          }
+        }
+      });
+      const ctxDes = document.getElementById('decelerationsChart').getContext('2d');
+      decelerationsChart = new Chart(ctxDes, {
+        type: 'bar',
+        data: {
+          labels: colisionesLabels,
+          datasets: [
+            {
+              label: 'Bloque A (ΔV)',
+              data: desacA,
+              backgroundColor: '#b2a418',
+              borderColor: '#b2a418',
+              borderWidth: 1.5,
+            },
+            {
+              label: 'Bloque B (ΔV)',
+              data: desacB,
+              backgroundColor: '#e4a900',
+              borderColor: '#e4a900',
+              borderWidth: 1.5,
+            }
+          ]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#967410', font: {size:14} }, },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y} m/s² — Cambio de velocidad (${ctx.label})`;
+                },
+                afterBody: () => "ΔV es la diferencia entre velocidad final e inicial en la colisión."
+              },
+              backgroundColor: "#fcf4de", titleColor: "#b2a418", bodyColor: "#7d5517"
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#b3a36a' } },
+            y: { ticks: { color: '#b3a36a' } }
+          }
+        }
+      });
+    }
+    function resetAll() {
+      if (confirm("¿Seguro que deseas reiniciar la simulación y el reporte?")) {
+        collisionData = [];
+        simulationRunning = false;
+        document.getElementById('finalVelA').textContent = '--';
+        document.getElementById('finalVelB').textContent = '--';
+        document.getElementById('accelA').textContent = '--';
+        document.getElementById('accelB').textContent = '--';
+        document.getElementById('collisionCount').textContent = '0';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        updateSimulationReports();
+        document.getElementById("chartsSection").style.display = "none";
+        document.getElementById('btnStart').disabled = false;
+        if (velocitiesChart) velocitiesChart.destroy();
+        if (decelerationsChart) decelerationsChart.destroy();
+      }
+    }
+    // ------------- Interactivo: slider y cámara lenta
+    const slider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedValue');
+    slider.addEventListener('input', () => {
+      simulationSpeed = parseFloat(slider.value);
+      speedVal.textContent = simulationSpeed.toFixed(2) + 'x';
+      document.getElementById('camSlow').classList.remove("active");
+    });
+    document.getElementById('camSlow').addEventListener('click', function() {
+      simulationSpeed = 0.2; slider.value = 0.2; speedVal.textContent = '0.20x';
+      this.classList.add("active");
+    });
+    updateSimulationReports();
+  </script>
+</body>
+</html>
